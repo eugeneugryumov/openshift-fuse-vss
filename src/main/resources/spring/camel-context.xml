@@ -171,9 +171,9 @@
                     type="path"
                     description="The id of the user to get"
                     dataType="integer" />
-<!--                 <responseMessage message="The user that was found" />
-                <responseMessage
-                    code="404"
+           <responseMessage message="The user message has been sent over JMSs" />
+   <!--              <responseMessage
+                   code="404"
                     message="User not found" /> -->
 
                 <to uri="direct:userJmsId" />
