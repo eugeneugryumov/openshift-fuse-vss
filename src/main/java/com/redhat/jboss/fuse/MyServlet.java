@@ -38,7 +38,7 @@ public class MyServlet extends HttpServlet {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	@Resource(name = "java:jboss/camel/context/spring-context")
+	@Resource(name = "java:jboss/camel/context/myCamel")
 	private CamelContext camelContext;
 
     @Override

@@ -44,6 +44,7 @@
             name="name"
             value="CamelServlet" />
     </bean>
+        <bean class="com.redhat.jboss.fuse.MyBean" id="helloBean"/>
     <camelContext
         id="myCamel"
         xmlns="http://camel.apache.org/schema/spring">
