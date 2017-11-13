@@ -170,6 +170,10 @@
                 </setHeader>
             </filter>
         </route>
+        <route id="_route1">
+            <from id="_from1" uri="direct:start"/>
+            <bean id="_bean1" ref="helloBean"/>
+        </route>
     </camelContext>
 
 </beans>
