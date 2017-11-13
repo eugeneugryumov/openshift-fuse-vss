@@ -26,10 +26,19 @@
     <bean
         id="userService"
         class="com.redhat.jboss.fuse.UserService" />
-            <bean
-        id="jmsService"
-        class="com.redhat.jboss.fuse.JMSService" />
-    <!-- Definition for CamelHttpTransportServlet bean -->
+            <bean class="org.apache.activemq.ActiveMQConnectionFactory" id="activemq-connection-factory">
+        <property name="brokerURL" value="vm://amq?broker.persistent=false"/>
+        <property name="userName" value=""/>
+        <property name="password" value=""/>
+    </bean>
+    <bean class="org.apache.activemq.camel.component.ActiveMQComponent" id="activemq">
+        <property name="configuration">
+            <bean class="org.apache.activemq.camel.component.ActiveMQConfiguration">
+                <property name="connectionFactory" ref="activemq-connection-factory"/>
+            </bean>
+        </property>
+    </bean>
+
     <bean
         id="camelHttpTransportServlet"
         class="org.apache.camel.component.servlet.CamelHttpTransportServlet" />
@@ -46,8 +55,8 @@
         <property
             name="name"
             value="CamelServlet" />
-    </bean>
-        <bean class="com.redhat.jboss.fuse.MyBean" id="helloBean"/>
+  </bean>
+     <!--      <bean class="com.redhat.jboss.fuse.MyBean" id="helloBean"/> -->
     <camelContext
         id="myCamel"
         xmlns="http://camel.apache.org/schema/spring">
@@ -142,13 +151,32 @@
                 <to uri="bean:userService?method=listUsers" />
             </get>
             
-           <get
+<!--            <get
                 id="user_jms_route"
                 uri="/userHello"
                 outType="java.lang.String">
                 <description>JMS client hello test message</description>
                 <responseMessage message="All the users" />
                 <to uri="bean:jmsService?method=getHelloName" />
+            </get> -->
+            
+                        <!-- this is a rest GET to view an user by the given id -->
+            <get
+                id="user_mq_route"
+                uri="/jms/{id}"
+                outType="com.redhat.jboss.fuse.User">
+                <description>send user over jms</description>
+                <param
+                    name="id"
+                    type="path"
+                    description="The id of the user to get"
+                    dataType="integer" />
+<!--                 <responseMessage message="The user that was found" />
+                <responseMessage
+                    code="404"
+                    message="User not found" /> -->
+
+                <to uri="direct:userJmsId" />
             </get>
         </rest>
 
@@ -183,10 +211,17 @@
                 </setHeader>
             </filter>
         </route>
-        <route id="_route1">
+<!--         <route id="_route1">
             <from id="_from1" uri="direct:start"/>
             <bean id="_bean1" ref="helloBean"/>
+        </route> -->
+        
+        <route id="rest-to-jms-route">
+            <from id="incoming" uri="direct:userJmsId"/>
+            <log id="logReceivingOrder" message="Receiving order ${id}"/>
+            <to id="sendIncomingOrder" uri="activemq:incomingOrders"/>
         </route>
+        
     </camelContext>
 
 </beans>

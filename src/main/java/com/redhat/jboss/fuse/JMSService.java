@@ -14,7 +14,7 @@ public class JMSService {
 	 * 
 	 */
 
-	@Resource(name = "java:jboss/camel/context/spring-context")
+	@Resource(name = "java:jboss/camel/context/myCamel")
 	private CamelContext camelContext;
 
 	protected String getHelloName( String name){
