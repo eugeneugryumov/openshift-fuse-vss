@@ -204,6 +204,9 @@
         <route id="user_id_processor_route">
             <from uri="direct:userId" />
             <to uri="bean:userService?method=getUser(${header.id})" />
+            <camel:setOutHeader headerName="JMS Message Sent">
+            	<camel:constant>JMS Message Sent</camel:constant>
+            </camel:setOutHeader>
             <filter>
                 <simple>${body} == null</simple>
                 <setHeader headerName="Exchange.HTTP_RESPONSE_CODE">
