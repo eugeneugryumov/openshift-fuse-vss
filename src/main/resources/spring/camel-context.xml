@@ -26,6 +26,9 @@
     <bean
         id="userService"
         class="com.redhat.jboss.fuse.UserService" />
+            <bean
+        id="jmsService"
+        class="com.redhat.jboss.fuse.JMSService" />
     <!-- Definition for CamelHttpTransportServlet bean -->
     <bean
         id="camelHttpTransportServlet"
@@ -137,6 +140,15 @@
                 <description>Find all users</description>
                 <responseMessage message="All the users" />
                 <to uri="bean:userService?method=listUsers" />
+            </get>
+            
+           <get
+                id="user_jms_route"
+                uri="/userHello"
+                outType="java.lang.String">
+                <description>JMS client hello test message</description>
+                <responseMessage message="All the users" />
+                <to uri="bean:jmsService?method=getHelloName" />
             </get>
         </rest>
 
