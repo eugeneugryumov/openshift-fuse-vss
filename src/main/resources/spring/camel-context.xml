@@ -15,18 +15,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<beans
-    xmlns="http://www.springframework.org/schema/beans"
+<beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:camel="http://camel.apache.org/schema/spring"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="
-            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-            http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="             http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd             http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
     <!-- a bean for user services -->
-    <bean
-        id="userService"
-        class="com.redhat.jboss.fuse.UserService" />
-            <bean class="org.apache.activemq.ActiveMQConnectionFactory" id="activemq-connection-factory">
+    <bean class="com.redhat.jboss.fuse.UserService" id="userService"/>
+    <bean class="org.apache.activemq.ActiveMQConnectionFactory" id="activemq-connection-factory">
         <property name="brokerURL" value="vm://amq?broker.persistent=false"/>
         <property name="userName" value=""/>
         <property name="password" value=""/>
@@ -38,28 +32,17 @@
             </bean>
         </property>
     </bean>
-
     <bean
-        id="camelHttpTransportServlet"
-        class="org.apache.camel.component.servlet.CamelHttpTransportServlet" />
+        class="org.apache.camel.component.servlet.CamelHttpTransportServlet" id="camelHttpTransportServlet"/>
     <!-- Definition for ServletRegistrationBean bean -->
     <bean
-        id="servletRegistrationBean"
-        class="org.springframework.boot.web.servlet.ServletRegistrationBean">
-        <constructor-arg
-            index="0"
-            ref="camelHttpTransportServlet" />
-        <constructor-arg
-            index="1"
-            value="/people-service/*" />
-        <property
-            name="name"
-            value="CamelServlet" />
-  </bean>
-     <!--      <bean class="com.redhat.jboss.fuse.MyBean" id="helloBean"/> -->
-    <camelContext
-        id="myCamel"
-        xmlns="http://camel.apache.org/schema/spring">
+        class="org.springframework.boot.web.servlet.ServletRegistrationBean" id="servletRegistrationBean">
+        <constructor-arg index="0" ref="camelHttpTransportServlet"/>
+        <constructor-arg index="1" value="/people-service/*"/>
+        <property name="name" value="CamelServlet"/>
+    </bean>
+    <!--      <bean class="com.redhat.jboss.fuse.MyBean" id="helloBean"/> -->
+    <camelContext id="myCamel" xmlns="http://camel.apache.org/schema/spring">
         <!-- configure rest to use the camel-servlet component, and use json binding mode -->
         <!-- and tell to output json in pretty print mode -->
         <!-- setup context path and port number that Apache Tomcat will deploy this application with,
@@ -69,89 +52,47 @@
              You can access the RestRegistry from JMX at runtime -->
         <!-- also enable swagger api, using the apiContextPath
              and enable CORS so the swagger-ui web console can access the swagger api docs -->
-        <restConfiguration
-            component="servlet"
-            bindingMode="json"
-            contextPath="/people-service/*"
-            port="8778"
-            apiContextPath="/api-docs"
-            apiContextListing="false"
-            enableCORS="true">
-
+        <restConfiguration apiContextListing="false"
+            apiContextPath="/api-docs" bindingMode="json"
+            component="servlet" contextPath="/people-service/*"
+            enableCORS="true" port="8778">
             <!-- we want json output in pretty mode -->
-            <dataFormatProperty
-                key="prettyPrint"
-                value="true" />
-            
+            <dataFormatProperty key="prettyPrint" value="true"/>
             <!-- setup swagger api descriptions -->
-            <apiProperty
-                key="base.path"
-                value="rest" />
-            <apiProperty
-                key="api.version"
-                value="1.2.3" />
-            <apiProperty
-                key="api.title"
-                value="User Services" />
-            <apiProperty
-                key="api.description"
-                value="Camel Rest Example with Swagger that provides an User REST service" />
-            <apiProperty
-                key="api.contact.name"
-                value="The Apache Camel team" />
-
+            <apiProperty key="base.path" value="rest"/>
+            <apiProperty key="api.version" value="1.2.3"/>
+            <apiProperty key="api.title" value="User Services"/>
+            <apiProperty key="api.description" value="Camel Rest Example with Swagger that provides an User REST service"/>
+            <apiProperty key="api.contact.name" value="The Apache Camel team"/>
         </restConfiguration>
-
         <!-- defines the rest services using the context-path /user -->
-        <rest
-            id="user_route"
-            path="/user"
-            consumes="application/json"
-            produces="application/json"
-            apiDocs="true">
+        <rest apiDocs="true" consumes="application/json" id="user_route"
+            path="/user" produces="application/json">
             <description>User rest service</description>
-            
             <!-- this is a rest GET to view an user by the given id -->
-            <get
-                id="user_id_route"
-                uri="/{id}"
-                outType="com.redhat.jboss.fuse.User">
+            <get id="user_id_route" outType="com.redhat.jboss.fuse.User" uri="/{id}">
                 <description>Find user by id</description>
-                <param
-                    name="id"
-                    type="path"
-                    description="The id of the user to get"
-                    dataType="integer" />
-                <responseMessage message="The user that was found" />
-                <responseMessage
-                    code="404"
-                    message="User not found" />
-                <to uri="direct:userId" />
+                <param dataType="integer"
+                    description="The id of the user to get" name="id" type="path"/>
+                <responseMessage message="The user that was found"/>
+                <responseMessage code="404" message="User not found"/>
+                <to uri="direct:userId"/>
             </get>
-
             <!-- this is a rest PUT to create/update an user -->
-            <put
-                id="user_put_route"
-                type="com.redhat.jboss.fuse.User">
+            <put id="user_put_route" type="com.redhat.jboss.fuse.User">
                 <description>Updates or create a user</description>
-                <param
-                    name="body"
-                    type="body"
-                    description="The user to update or create" />
-                <to uri="bean:userService?method=updateUser" />
+                <param description="The user to update or create"
+                    name="body" type="body"/>
+                <to uri="bean:userService?method=updateUser"/>
             </put>
-
             <!-- this is a rest GET to find all users -->
-            <get
-                id="user_findall_route"
-                uri="/findAll"
-                outType="com.redhat.jboss.fuse.User[]">
+            <get id="user_findall_route"
+                outType="com.redhat.jboss.fuse.User[]" uri="/findAll">
                 <description>Find all users</description>
-                <responseMessage message="All the users" />
-                <to uri="bean:userService?method=listUsers" />
+                <responseMessage message="All the users"/>
+                <to uri="bean:userService?method=listUsers"/>
             </get>
-            
-<!--            <get
+            <!--            <get
                 id="user_jms_route"
                 uri="/userHello"
                 outType="java.lang.String">
@@ -159,38 +100,23 @@
                 <responseMessage message="All the users" />
                 <to uri="bean:jmsService?method=getHelloName" />
             </get> -->
-            
-                        <!-- this is a rest GET to view an user by the given id -->
-            <get
-                id="user_mq_route"
-                uri="/jms/{id}"
-                outType="com.redhat.jboss.fuse.User">
+            <!-- this is a rest GET to view an user by the given id -->
+            <get id="user_mq_route" outType="com.redhat.jboss.fuse.User" uri="/jms/{id}">
                 <description>send user over jms</description>
-                <param
-                    name="id"
-                    type="path"
-                    description="The id of the user to get"
-                    dataType="integer" />
-           <responseMessage message="The user message has been sent over JMSs" />
-   <!--              <responseMessage
+                <param dataType="integer"
+                    description="The id of the user to get" name="id" type="path"/>
+                <!--   <responseMessage message="The user message has been sent over JMSs"/>-->
+                <!--              <responseMessage
                    code="404"
                     message="User not found" /> -->
-
-                <to uri="direct:userJmsId" />
+                <to uri="direct:userJmsId"/>
             </get>
         </rest>
-
         <!-- defines the rest services using the context-path /echo -->
-        <rest
-            id="user_test_route"
-            path="/echo"
-            consumes="application/text"
-            produces="application/text">
+        <rest consumes="application/text" id="user_test_route"
+            path="/echo" produces="application/text">
             <description>Echo rest service</description>
-
-            <get
-                id="user_test_ping_route" 
-                uri="/ping">
+            <get id="user_test_ping_route" uri="/ping">
                 <description>A ping service</description>
                 <route>
                     <transform>
@@ -198,33 +124,28 @@
                     </transform>
                 </route>
             </get>
-
         </rest>
-
         <route id="user_id_processor_route">
-            <from uri="direct:userId" />
-            <to uri="bean:userService?method=getUser(${header.id})" />
-            <camel:setOutHeader headerName="JMS Message Sent">
-            	<camel:constant>JMS Message Sent</camel:constant>
+            <from id="_from1" uri="direct:userId"/>
+            <to id="_to1" uri="bean:userService?method=getUser(${header.id})"/>
+            <camel:setOutHeader headerName="JMS Message Sent" id="_setOutHeader1">
+                <camel:constant>JMS Message Sent</camel:constant>
             </camel:setOutHeader>
-            <filter>
+            <filter id="_filter1">
                 <simple>${body} == null</simple>
-                <setHeader headerName="Exchange.HTTP_RESPONSE_CODE">
+                <setHeader headerName="Exchange.HTTP_RESPONSE_CODE" id="_setHeader1">
                     <constant>404</constant>
                 </setHeader>
             </filter>
         </route>
-<!--         <route id="_route1">
+        <!--         <route id="_route1">
             <from id="_from1" uri="direct:start"/>
             <bean id="_bean1" ref="helloBean"/>
         </route> -->
-        
         <route id="rest-to-jms-route">
             <from id="incoming" uri="direct:userJmsId"/>
             <log id="logReceivingOrder" message="Receiving order ${id}"/>
             <to id="sendIncomingOrder" uri="activemq:incomingOrders"/>
         </route>
-        
     </camelContext>
-
 </beans>
