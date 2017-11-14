@@ -221,8 +221,8 @@
         
         <route id="rest-to-jms-route">
             <from id="incoming" uri="direct:userJmsId"/>
-            <log id="logReceivingOrder" message="Receiving order ${id}"/>
-            <to id="sendIncomingOrder" uri="activemq:incomingOrders"/>
+            <log id="logReceiving" message="Receiving order ${id}"/>
+            <to id="sendIncoming" uri="activemq:incomingOrders"/>
         </route>
         
     </camelContext>
